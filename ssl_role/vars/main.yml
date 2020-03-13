@@ -1,0 +1,3 @@
+---
+# vars file for ssl_role
+cert_path: /tmp/cert_path

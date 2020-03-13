@@ -1,0 +1,1 @@
+Example: ansile-playbook test.yml -e host=ababio.com -e email=michaelkwasi@gmail.com -e ssl_test=dns

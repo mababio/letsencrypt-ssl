@@ -1,0 +1,19 @@
+---
+
+  - name: Get OS specs
+    command: uname -a
+    ignore_errors: yes
+    register: uname_result
+
+  - name: install packages
+    include: install_packages_ubuntu.yml
+    when: ansible_distribution == 'Ubuntu'
+
+
+  - name: Install ssl for AWS OPENVPN with html
+    include: install_ssl_awsopenvpn.yml
+    when: uname_result.stdout | search("openvpn") and ssl_test == "html"
+
+  - name: Install ssl for AWS OPENVPN with DNS
+    include: get_ssl_dns_awsopenvpn.yml
+    when: uname_result.stdout | search("openvpn") and  ssl_test == "dns"
