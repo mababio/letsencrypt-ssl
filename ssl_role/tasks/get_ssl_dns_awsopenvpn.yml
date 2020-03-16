@@ -7,30 +7,21 @@
       - python3-certbot-dns-route53
 
 
-  - name: Certbot Installation
-    apt: name="{{ item }}" state=installed
-    with_items:
-      - certbot
-      - python-certbot-apache
-
-
-  - name: create cert_path directory
-    file: state=directory path={{ cert_path }}
-
   - name: get certonly DNS
-    command: certbot --cert-path {{ cert_path }} --key-path {{ cert_path }} --chain-path {{ cert_path }}  -m {{ email }} -d {{ host }}  certonly --dns-route53 --non-interactive --agree-tos 
+    command: certbot --non-interactive --agree-tos  -m {{ email }} -d {{ host }}  certonly --dns-route53 --pre-hook 'service openvpnas stop' --post-hook 'service openvpnas start'
 
-  - name: download sources
-    get_url: url=https://openvpn.net/downloads/openvpn-as-latest-ubuntu18.amd_64.deb dest=/tmp/openvpn.deb
+  - name: configure symlink between letsencrypt cert path to openvpn cert path
+    command: ln -s -f /etc/letsencrypt/live/{{ host }}/privkey.pem /usr/local/openvpn_as/etc/web-ssl/privkey.pem
 
-  - name: install deb package
-    apt:
-        deb: /tmp/openvpn.deb
+  - name: configure symlink between letsencrypt key path to openvpn key path
+    command: ln -s -f /etc/letsencrypt/live/{{ host }}/cert.pem /usr/local/openvpn_as/etc/web-ssl/cert.pem
 
+  - name: configure symlink between letsencrypt key path to openvpn key path
+    command: ln -s -f /etc/letsencrypt/live/{{ host }}/chain.pem /usr/local/openvpn_as/etc/web-ssl/chain.pem
 
-## Optional ... may cause issue, but run again and it should be okay
-  # - name: back up old cert
-  #   command: /usr/local/openvpn_as/scripts/sacli --import GetActiveWebCerts
+  ## Optional ... may cause issue, but run again and it should be okay
+    # - name: back up old cert
+    #   command: /usr/local/openvpn_as/scripts/sacli --import GetActiveWebCerts
 
   - name: install private key
     command:  /usr/local/openvpn_as/scripts/sacli --key "cs.priv_key" --value_file "/etc/letsencrypt/live/{{ host }}/privkey.pem" ConfigPut
@@ -41,5 +32,7 @@
   - name: install private chain
     command:  /usr/local/openvpn_as/scripts/sacli --key "cs.ca_bundle" --value_file "/etc/letsencrypt/live/{{ host }}/chain.pem" ConfigPut
 
-  - name: Refresh openvpn with new ssl key
-    command: /usr/local/openvpn_as/scripts/sacli start
+  - name: Restart service httpd, in all cases
+    service:
+      name: openvpnas
+      state: restarted

@@ -9,7 +9,6 @@
     include: install_packages_ubuntu.yml
     when: ansible_distribution == 'Ubuntu'
 
-
   - name: Install ssl for AWS OPENVPN with html
     include: install_ssl_awsopenvpn.yml
     when: uname_result.stdout | search("openvpn") and ssl_test == "html"
