@@ -1,1 +1,31 @@
+Role: ssl_role
+=========
+
+Automatic the process of obtaining ssl cert with letsencrypt.
+
+Requirements
+------------
+Server: EC2 OPENVPN instance with aws_policy.xml enabled
+
+
+Role Variables
+--------------
+
+host = domain name
+email = This email will be linked to the ssl cert
+ssl_test= {dns, html}  Chose challenge type. html requires port 80 to be open
+
+
+Dependencies
+------------
+
+
+Example Playbook
+----------------
+
 Example: ansile-playbook test.yml -e host=ababio.com -e email=michaelkwasi@gmail.com -e ssl_test=dns
+
+Author Information
+------------------
+
+An optional section for the role authors to include contact information, or a website (HTML is not allowed).
