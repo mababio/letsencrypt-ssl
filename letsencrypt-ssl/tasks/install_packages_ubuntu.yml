@@ -1,0 +1,29 @@
+---
+
+  - name: Update the software package repository
+    apt:
+      update_cache: yes
+    when: ansible_distribution == 'Ubuntu'
+
+  - name: software-properties-common Installation
+    apt: name="{{ item }}" state=installed
+    with_items:
+      - software-properties-common
+
+
+  - name: apt_repo
+    apt_repository:
+      repo: "{{ item }}"
+    with_items:
+        #- universe
+        - ppa:certbot/certbot
+
+  - name: Update the software package repository
+    apt:
+     update_cache: yes
+
+  - name: Certbot Installation
+    apt: name="{{ item }}" state=installed
+    with_items:
+      - certbot
+      - python-certbot-apache

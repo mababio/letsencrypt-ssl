@@ -1,0 +1,38 @@
+---
+
+  - name: certbot dns-route53 Installation
+    apt: name="{{ item }}" state=installed
+    with_items:
+      - awscli
+      - python3-certbot-dns-route53
+
+
+  - name: get certonly DNS
+    command: certbot --non-interactive --agree-tos  -m {{ email }} -d {{ host }}  certonly --dns-route53 --pre-hook 'service openvpnas stop' --post-hook 'service openvpnas start'
+
+  - name: configure symlink between letsencrypt cert path to openvpn cert path
+    command: ln -s -f /etc/letsencrypt/live/{{ host }}/privkey.pem /usr/local/openvpn_as/etc/web-ssl/privkey.pem
+
+  - name: configure symlink between letsencrypt key path to openvpn key path
+    command: ln -s -f /etc/letsencrypt/live/{{ host }}/cert.pem /usr/local/openvpn_as/etc/web-ssl/cert.pem
+
+  - name: configure symlink between letsencrypt key path to openvpn key path
+    command: ln -s -f /etc/letsencrypt/live/{{ host }}/chain.pem /usr/local/openvpn_as/etc/web-ssl/chain.pem
+
+  ## Optional ... may cause issue, but run again and it should be okay
+    # - name: back up old cert
+    #   command: /usr/local/openvpn_as/scripts/sacli --import GetActiveWebCerts
+
+  - name: install private key
+    command:  /usr/local/openvpn_as/scripts/sacli --key "cs.priv_key" --value_file "/etc/letsencrypt/live/{{ host }}/privkey.pem" ConfigPut
+
+  - name: install private cert
+    command:  /usr/local/openvpn_as/scripts/sacli --key "cs.cert" --value_file "/etc/letsencrypt/live/{{ host }}/cert.pem" ConfigPut
+
+  - name: install private chain
+    command:  /usr/local/openvpn_as/scripts/sacli --key "cs.ca_bundle" --value_file "/etc/letsencrypt/live/{{ host }}/chain.pem" ConfigPut
+
+  - name: Restart service httpd, in all cases
+    service:
+      name: openvpnas
+      state: restarted

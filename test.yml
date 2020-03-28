@@ -3,4 +3,4 @@
   remote_user: openvpnas
   sudo: yes
   roles:
-    - ssl_role
+    - letsencrypt-ssl
