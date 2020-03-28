@@ -13,7 +13,7 @@ Role Variables
 
 host = domain name
 email = This email will be linked to the ssl cert
-ssl_test= {dns, html}  Chose challenge type. html requires port 80 to be open
+ssl_test= {dns, html}  Choose challenge type. html requires port 80 to be open
 
 
 Dependencies
